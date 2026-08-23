@@ -1,26 +1,252 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..900&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=JetBrains+Mono:wght@400;700;800&display=swap');
 @import "tailwindcss";
 
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #090a0f;
+  --bg-card: rgba(18, 20, 29, 0.7);
+  --bg-card-hover: rgba(26, 29, 42, 0.85);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --accent-lime: #d4ff00;
+  --accent-cyan: #00f0ff;
+  --accent-orange: #ff4d00;
+  --accent-purple: #9d4edd;
+  --text-main: #f4f4f6;
+  --text-muted: #8e92a4;
+  --font-display: 'Bricolage Grotesque', sans-serif;
+  --font-serif: 'EB Garamond', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+
+
+body {
+  background-color: var(--bg);
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 240, 255, 0.08), transparent),
+    radial-gradient(circle 600px at 90% 20%, rgba(212, 255, 0, 0.04), transparent),
+    radial-gradient(circle 800px at 10% 80%, rgba(157, 78, 221, 0.05), transparent);
+  background-attachment: fixed;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Typography styles */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-serif-italic {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.font-mono-code {
+  font-family: var(--font-mono);
+}
+
+/* Layout Shell */
+.shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* TYO Cards & Glass */
+.glass {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1.25rem;
+}
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+.glass-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+}
+
+.eyebrow {
+  color: var(--accent-lime);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 9999px;
+  padding: 0.85rem 1.6rem;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #050608;
+  background: var(--accent-lime);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(212, 255, 0, 0.25);
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.03);
+  box-shadow: 0 15px 35px -5px rgba(212, 255, 0, 0.4);
+  background: #e2ff40;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+}
+
+.btn-cyan {
+  background: var(--accent-cyan);
+  color: #050608;
+  box-shadow: 0 10px 25px -5px rgba(0, 240, 255, 0.25);
+}
+
+.btn-cyan:hover:not(:disabled) {
+  background: #40f4ff;
+  box-shadow: 0 15px 35px -5px rgba(0, 240, 255, 0.4);
+}
+
+/* Fields & Inputs */
+.field {
+  width: 100%;
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: rgba(14, 16, 24, 0.8);
+  color: var(--text-main);
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.field:focus {
+  border-color: var(--accent-cyan);
+  background: rgba(18, 20, 32, 0.95);
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.15);
+}
+
+.field::placeholder {
+  color: rgba(142, 146, 164, 0.5);
+}
+
+/* Marquee Ticker */
+.marquee-container {
+  overflow: hidden;
+  user-select: none;
+  display: flex;
+  gap: 2rem;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  min-width: 100%;
+  gap: 2rem;
+  animation: scroll-left 25s linear infinite;
+}
+
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Animations */
+.reveal {
+  animation: reveal 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pulse {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.97);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(9, 10, 15, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+

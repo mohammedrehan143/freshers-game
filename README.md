@@ -1,36 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EPOCH FRESHERS CHALLENGE 2026
 
-## Getting Started
+Production-oriented Next.js + Supabase live quiz show for 100+ concurrent students.
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Create a Supabase project and in **SQL Editor** run `supabase/migrations/001_epoch_schema.sql`, then `supabase/migrations/002_automatic_teams.sql`, then `supabase/seed.sql`.
+2. Copy `.env.example` to `.env.local` and set the project URL, anon key, service-role key, and a strong `ADMIN_PASSWORD`. The service key is server-only: never prefix it with `NEXT_PUBLIC_`.
+3. Run `cmd /c npm run dev`, then visit `http://localhost:3000`.
+4. Open `/admin`, authenticate, and select **CREATE GAME & GENERATE QUIZ CODE**. Share its generated code with students at `/join`.
+5. Students receive 10 questions with a synchronized 5-minute countdown. Teams are dynamically calculated ($T = \lceil N/4 \rceil$) so that every team has at most 4 members and players are split equally.
+6. Run `/leaderboard` on the projector.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database model
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`epoch_games` is the synchronized source of truth. `epoch_players` own opaque local session tokens and receive dynamic automatic team assignments ($T = \lceil N/4 \rceil$, max 4 members per team, split equally). `epoch_teams` belong to games. `epoch_questions` retains correct options privately. `epoch_answers` has a unique `(question_id, player_id)` constraint and records server-calculated points. Team rankings use the **average of member totals**, never a sum.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+RLS permits only the minimal public reads used by Realtime. All joins, game payloads, answers, and host operations use server route handlers with the service key; correct answers are never included in player payloads until completion.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
