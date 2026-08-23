@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { serviceSupabase } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
+
 const schema = z.object({
   gameCode: z.string().trim().min(4).max(20),
   fullName: z.string().trim().min(2).max(80),

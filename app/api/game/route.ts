@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { serviceSupabase } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
+
 export async function GET(req: NextRequest) {
   const playerId = req.nextUrl.searchParams.get("playerId");
   const token = req.nextUrl.searchParams.get("token");

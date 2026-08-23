@@ -1,19 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Teams() {
+  const router = useRouter();
   const [data, setData] = useState<any>();
 
   const load = () =>
     fetch("/api/admin/state")
-      .then((r) => r.json())
-      .then(setData);
+      .then((r) => {
+        if (r.status === 401) {
+          router.push("/admin");
+          return null;
+        }
+        return r.json();
+      })
+      .then((d) => d && setData(d));
 
   useEffect(() => {
     void load();
   }, []);
+
 
   const move = async (playerId: string, teamId: string) => {
     await fetch("/api/admin/control", {

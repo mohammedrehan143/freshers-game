@@ -1,16 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Players() {
+  const router = useRouter();
   const [data, setData] = useState<any>();
 
   useEffect(() => {
     fetch("/api/admin/state")
-      .then((r) => r.json())
-      .then(setData);
-  }, []);
+      .then((r) => {
+        if (r.status === 401) {
+          router.push("/admin");
+          return null;
+        }
+        return r.json();
+      })
+      .then((d) => d && setData(d));
+  }, [router]);
+
 
   return (
     <main className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 w-full flex flex-col items-center overflow-x-hidden">

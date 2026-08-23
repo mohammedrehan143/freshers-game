@@ -17,29 +17,35 @@ async function responseData(response: Response) {
 }
 
 export default function Admin() {
-  const [data, setData] = useState<any>();
+  const [data, setData] = useState<any>(null);
+  const [authStatus, setAuthStatus] = useState<"checking" | "unauthenticated" | "authenticated">("checking");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/state");
-      const body = await responseData(response);
       if (response.status === 401) {
         setData(null);
+        setAuthStatus("unauthenticated");
         return;
       }
+      const body = await responseData(response);
       if (!response.ok) {
         setData(null);
         setError(body.error || "Unable to load the host dashboard.");
+        setAuthStatus("unauthenticated");
         return;
       }
       setError("");
       setData(body);
+      setAuthStatus("authenticated");
     } catch {
       setData(null);
-      setError("Unable to reach the server. Check that npm run dev is running.");
+      setError("Unable to reach the server. Check network connection.");
+      setAuthStatus("unauthenticated");
     }
   }, []);
 
@@ -48,6 +54,17 @@ export default function Admin() {
   }, [load]);
 
   const live = useRealtime(data?.game?.id, load);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
+    setData(null);
+    setPassword("");
+    setAuthStatus("unauthenticated");
+  };
 
   // Live Timer for Host
   useEffect(() => {
@@ -79,21 +96,50 @@ export default function Admin() {
     }
   }
 
-  if (!data) {
+  // 1. Loading / Checking Credentials State (Prevents flash of login screen)
+  if (authStatus === "checking") {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#090a0f] overflow-x-hidden">
+        <div className="flex flex-col items-center gap-3">
+          <span className="w-8 h-8 rounded-sm bg-[#d4ff00] animate-spin" />
+          <p className="font-mono text-xs uppercase tracking-widest text-slate-400 text-center">
+            VERIFYING HOST CREDENTIALS…
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // 2. Unauthenticated Passcode Entry Form
+  if (authStatus === "unauthenticated" || !data) {
     return (
       <main className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#090a0f] overflow-x-hidden">
         <form
           className="glass max-w-md w-full p-6 sm:p-10 space-y-5 border-white/10 relative overflow-hidden rounded-2xl text-center"
           onSubmit={async (e) => {
             e.preventDefault();
-            const response = await fetch("/api/admin/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ password }),
-            });
-            const body = await responseData(response);
-            if (response.ok) void load();
-            else setError(body.error || "Unable to log in.");
+            setIsLoggingIn(true);
+            setError("");
+
+            try {
+              const response = await fetch("/api/admin/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
+              });
+              const body = await responseData(response);
+              setIsLoggingIn(false);
+
+              if (response.ok) {
+                setPassword("");
+                void load();
+              } else {
+                setError(body.error || "Incorrect host password.");
+              }
+            } catch {
+              setIsLoggingIn(false);
+              setError("Network error. Please try again.");
+            }
           }}
         >
           <div className="flex items-center justify-center gap-2">
@@ -112,9 +158,10 @@ export default function Admin() {
               Host Password
             </label>
             <input
+              required
               className="field font-mono text-center text-base py-3"
               type="password"
-              placeholder="Enter admin password..."
+              placeholder="Enter host password..."
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -126,13 +173,17 @@ export default function Admin() {
             </p>
           )}
 
-          <button className="btn w-full py-3.5 text-xs font-mono font-black tracking-wider text-center">
-            AUTHENTICATE & UNLOCK →
+          <button
+            disabled={isLoggingIn}
+            className="btn w-full py-3.5 text-xs font-mono font-black tracking-wider text-center"
+          >
+            {isLoggingIn ? "AUTHENTICATING…" : "AUTHENTICATE & UNLOCK →"}
           </button>
         </form>
       </main>
     );
   }
+
 
 
   if (!data.game) {
@@ -181,7 +232,7 @@ export default function Admin() {
             </p>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+          <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 sm:gap-3 flex-wrap">
             <Link
               href="/leaderboard"
               target="_blank"
@@ -189,9 +240,18 @@ export default function Admin() {
             >
               PROJECTOR ↗
             </Link>
+            <button
+              onClick={handleLogout}
+              className="text-xs font-mono font-bold text-rose-300 hover:text-rose-200 px-3.5 py-1.5 rounded-full border border-rose-500/30 bg-rose-950/40 hover:bg-rose-950/70 transition-all flex items-center gap-1.5"
+              title="Lock host control room"
+            >
+              <span>🔒</span>
+              <span>LOCK</span>
+            </button>
             <Connection connected={live} />
           </div>
         </header>
+
 
         {/* Live Metrics Row */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
